@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -192,8 +193,11 @@ export default function Step1Screen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isComplete) return;
+    if (profileImage) {
+      await AsyncStorage.setItem('profileImage', profileImage);
+    }
     router.push('/onboarding/step2' as never);
   };
 

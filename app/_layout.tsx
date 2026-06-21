@@ -38,6 +38,7 @@ export default function RootLayout() {
     Afacad_600SemiBold_Italic,
     Afacad_700Bold,
     Afacad_700Bold_Italic,
+    Ionicons: require('@react-native-vector-icons/ionicons/fonts/Ionicons.ttf'),
   });
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
 

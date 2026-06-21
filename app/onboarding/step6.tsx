@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,8 +32,9 @@ const cardStyles = StyleSheet.create({
 });
 
 export default function Step6Screen() {
-  const handleStart = () => {
-    router.replace('/(tabs)' as never);
+  const handleStart = async () => {
+    await AsyncStorage.setItem('hasOnboarded', 'true');
+    router.replace('/(tabs)/today');
   };
 
   return (

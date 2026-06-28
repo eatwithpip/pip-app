@@ -1,9 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useOnboarding } from '@/context/OnboardingContext';
 import {
   Image,
   Modal,
@@ -167,6 +167,7 @@ function RadioGroup({ options, value, onChange }: RadioGroupProps) {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function Step1Screen() {
+  const { update } = useOnboarding();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
   const [birthDay, setBirthDay] = useState('');
@@ -193,11 +194,16 @@ export default function Step1Screen() {
     }
   };
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     if (!isComplete) return;
-    if (profileImage) {
-      await AsyncStorage.setItem('profileImage', profileImage);
-    }
+    update({
+      name: firstName,
+      dateOfBirth: `${birthYear}-${birthMonth}-${birthDay}`,
+      gender,
+      dietaryPreference: dietary,
+      location,
+      profileImageUri: profileImage,
+    });
     router.push('/onboarding/step2' as never);
   };
 

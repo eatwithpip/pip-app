@@ -155,7 +155,7 @@ export default function Step5Screen() {
   const [scores, setScores] = useState<Record<string, number>>(initialScores);
 
   const handleSave = () => {
-    router.push('/onboarding/step6' as never);
+    router.push({ pathname: '/onboarding/step6', params: { goals } } as never);
   };
 
   return (

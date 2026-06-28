@@ -1,10 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ContinueButton from '@/components/onboarding/ContinueButton';
 import Text from '@/components/ui/Text';
+import { useOnboarding } from '@/context/OnboardingContext';
+import { useInvalidateProfile } from '@/hooks/useProfile';
+import { supabase } from '@/lib/supabase';
 import { C } from '@/constants/palette';
 
 function DisclaimerCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -31,10 +34,82 @@ const cardStyles = StyleSheet.create({
   },
 });
 
+async function uploadAvatar(userId: string, localUri: string): Promise<string | null> {
+  try {
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+    const mimeType = blob.type || 'image/jpeg';
+    const ext = mimeType.split('/')[1]?.split('+')[0]?.split(';')[0] || 'jpg';
+    const path = `${userId}/avatar.${ext}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, blob, {
+      upsert: true,
+      contentType: mimeType,
+    });
+    if (error) return null;
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    return data.publicUrl;
+  } catch {
+    return null;
+  }
+}
+
 export default function Step6Screen() {
+  const { data: onboarding } = useOnboarding();
+  const invalidateProfile = useInvalidateProfile();
+  const { goals } = useLocalSearchParams<{ goals: string }>();
+  const [saving, setSaving] = useState(false);
+
   const handleStart = async () => {
-    await AsyncStorage.setItem('hasOnboarded', 'true');
-    router.replace('/(tabs)/today');
+    if (saving) return;
+    setSaving(true);
+    try {
+      // Re-fetch the session so the supabase client has a fresh JWT for REST calls
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        Alert.alert('Session expired', 'Please sign in again.');
+        router.replace('/(auth)/sign-in');
+        return;
+      }
+      const userId = session.user.id;
+
+      // Upload avatar if the user chose one
+      let profileImageUrl: string | null = null;
+      if (onboarding.profileImageUri) {
+        profileImageUrl = await uploadAvatar(userId, onboarding.profileImageUri);
+      }
+
+      // Save profile
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: userId,
+        name: onboarding.name || null,
+        date_of_birth: onboarding.dateOfBirth || null,
+        gender: onboarding.gender || null,
+        dietary_preferences: onboarding.dietaryPreference ? [onboarding.dietaryPreference] : null,
+        location: onboarding.location || null,
+        profile_image_url: profileImageUrl,
+        difficulty: onboarding.difficulty || null,
+        updated_at: new Date().toISOString(),
+      });
+      if (profileError) throw profileError;
+
+      // Save selected goals
+      const goalIds = goals ? goals.split(',').filter(Boolean) : [];
+      if (goalIds.length > 0) {
+        await supabase.from('user_goals').delete().eq('user_id', userId);
+        const { error: goalsError } = await supabase.from('user_goals').insert(
+          goalIds.map(goal_id => ({ user_id: userId, goal_id }))
+        );
+        if (goalsError) throw goalsError;
+      }
+
+      // Invalidate the profile cache so the router redirects to tabs
+      await invalidateProfile();
+      router.replace('/(tabs)/today');
+    } catch (err: any) {
+      Alert.alert('Something went wrong', err.message ?? 'Could not save your profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -69,7 +144,7 @@ export default function Step6Screen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <ContinueButton onPress={handleStart} enabled label="Start logging" />
+        <ContinueButton onPress={handleStart} enabled={!saving} label={saving ? 'Saving…' : 'Start logging'} />
       </View>
     </SafeAreaView>
   );

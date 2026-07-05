@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,17 +12,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@/components/ui/Button';
 import Text from '@/components/ui/Text';
+import TextInputField from '@/components/ui/TextInputField';
 import { useAuth } from '@/context/AuthContext';
 import { C } from '@/constants/palette';
-import { FONTS } from '@/constants/typography';
 
 export default function SignUpScreen() {
   const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const canSubmit = email.trim().length > 0 && password.length >= 6;
 
@@ -54,38 +51,24 @@ export default function SignUpScreen() {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.field}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[styles.input, emailFocused && styles.inputFocused]}
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              placeholder="you@example.com"
-              placeholderTextColor={C.doveGrey}
-            />
-          </View>
+          <TextInputField
+            label="Email"
+            type="email"
+            value={email}
+            onChangeText={setEmail}
+            returnKeyType="next"
+            placeholder="you@example.com"
+          />
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={[styles.input, passwordFocused && styles.inputFocused]}
-              value={password}
-              onChangeText={setPassword}
-              onFocus={() => setPasswordFocused(true)}
-              onBlur={() => setPasswordFocused(false)}
-              secureTextEntry
-              returnKeyType="done"
-              onSubmitEditing={handleSignUp}
-              placeholder="At least 6 characters"
-              placeholderTextColor={C.doveGrey}
-            />
-          </View>
+          <TextInputField
+            label="Password"
+            type="password"
+            value={password}
+            onChangeText={setPassword}
+            returnKeyType="done"
+            onSubmitEditing={handleSignUp}
+            placeholder="At least 6 characters"
+          />
 
           <Button
             label="Create account"
@@ -134,28 +117,6 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
-  },
-  field: {
-    gap: 6,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: C.text,
-  },
-  input: {
-    height: 52,
-    borderWidth: 2,
-    borderColor: C.nobel,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    fontFamily: FONTS.regular,
-    color: C.text,
-    backgroundColor: C.white,
-  },
-  inputFocused: {
-    borderColor: C.robinEggBlue,
   },
   footer: {
     flexDirection: 'row',

@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     justifyContent: 'center',
   },
   header: {
@@ -114,7 +114,20 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   form: {
-    gap: 16,
+    gap: 20,
+    backgroundColor: C.white,
+    borderRadius: 12,
+    padding: 20,
+    ...Platform.select({
+      web: { boxShadow: '4px 4px 8px 0px rgba(238, 221, 201, 0.2)' },
+      default: {
+        shadowColor: '#EEDDC9',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
+      },
+    }),
   },
   footer: {
     flexDirection: 'row',

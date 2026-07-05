@@ -52,6 +52,7 @@ export default function SignInScreen() {
           <TextInputField
             label="Email"
             type="email"
+            required
             value={email}
             onChangeText={setEmail}
             returnKeyType="next"
@@ -61,6 +62,7 @@ export default function SignInScreen() {
           <TextInputField
             label="Password"
             type="password"
+            required
             value={password}
             onChangeText={setPassword}
             returnKeyType="done"

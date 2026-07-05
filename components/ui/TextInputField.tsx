@@ -17,9 +17,10 @@ type InputType = 'text' | 'email' | 'password';
 interface Props extends Omit<TextInputProps, 'secureTextEntry' | 'keyboardType'> {
   label: string;
   type?: InputType;
+  required?: boolean;
 }
 
-export default function TextInputField({ label, type = 'text', style, ...rest }: Props) {
+export default function TextInputField({ label, type = 'text', required = false, style, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,7 +29,10 @@ export default function TextInputField({ label, type = 'text', style, ...rest }:
 
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.label}>
+        {label}
+        {required && <Text style={styles.asterisk}> *</Text>}
+      </Text>
       <View style={[styles.inputRow, focused && styles.inputRowFocused]}>
         <TextInput
           style={[styles.input, style]}
@@ -36,7 +40,7 @@ export default function TextInputField({ label, type = 'text', style, ...rest }:
           keyboardType={isEmail ? 'email-address' : 'default'}
           autoCapitalize={isEmail || isPassword ? 'none' : 'sentences'}
           autoCorrect={!isEmail && !isPassword}
-          placeholderTextColor={C.doveGrey}
+          placeholderTextColor={C.nobel}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           {...rest}
@@ -90,6 +94,10 @@ const styles = StyleSheet.create({
     outlineWidth: 0,
     fontFamily: FONTS.regular,
     color: C.text,
+  },
+  asterisk: {
+    color: C.error,
+    fontWeight: '700',
   },
   eyeButton: {
     paddingHorizontal: 12,

@@ -58,6 +58,7 @@ export default function SignUpScreen() {
           <TextInputField
             label="Email"
             type="email"
+            required
             value={email}
             onChangeText={setEmail}
             returnKeyType="next"
@@ -67,6 +68,7 @@ export default function SignUpScreen() {
           <TextInputField
             label="Password"
             type="password"
+            required
             value={password}
             onChangeText={setPassword}
             returnKeyType="next"
@@ -76,6 +78,7 @@ export default function SignUpScreen() {
           <TextInputField
             label="Confirm password"
             type="password"
+            required
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             returnKeyType="done"

@@ -215,7 +215,7 @@ export default function Step1Screen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <OnboardingHeader title="Getting to know you" />
+        <OnboardingHeader title="Getting to know you" showBack={false} />
         <StepDots total={5} current={1} />
 
         {/* Page title */}

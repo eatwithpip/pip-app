@@ -20,9 +20,13 @@ export default function SignUpScreen() {
   const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = email.trim().length > 0 && password.length >= 6;
+  const canSubmit =
+    email.trim().length > 0 &&
+    password.length >= 6 &&
+    password === confirmPassword;
 
   const handleSignUp = async () => {
     if (!canSubmit || loading) return;
@@ -65,9 +69,18 @@ export default function SignUpScreen() {
             type="password"
             value={password}
             onChangeText={setPassword}
+            returnKeyType="next"
+            placeholder="At least 6 characters"
+          />
+
+          <TextInputField
+            label="Confirm password"
+            type="password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             returnKeyType="done"
             onSubmitEditing={handleSignUp}
-            placeholder="At least 6 characters"
+            placeholder="Repeat your password"
           />
 
           <Button

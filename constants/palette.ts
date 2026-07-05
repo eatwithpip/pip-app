@@ -17,7 +17,7 @@ export const C = {
   cornflowerBlue: '#6765FF',
   robinEggBlue: '#00CDD3',
 
-  // Orange (cards, tags)
+  // Orange (cards, tags, CTAs)
   sunshade: '#FF9B29',
 
   // Status
@@ -27,4 +27,7 @@ export const C = {
   // Tooltip
   lavender: '#D8D4FA',
   lavenderIcon: '#8280CC',
+
+  // Overlay (modal backdrops)
+  overlay: 'rgba(0,0,0,0.35)',
 } as const;

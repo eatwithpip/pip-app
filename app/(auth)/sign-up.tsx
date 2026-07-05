@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import Button from '@/components/ui/Button';
 import Text from '@/components/ui/Text';
 import { useAuth } from '@/context/AuthContext';
 import { C } from '@/constants/palette';
@@ -87,18 +87,13 @@ export default function SignUpScreen() {
             />
           </View>
 
-          <TouchableOpacity
-            style={[styles.button, !canSubmit && styles.buttonDisabled]}
+          <Button
+            label="Create account"
             onPress={handleSignUp}
-            disabled={!canSubmit || loading}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <ActivityIndicator color={C.white} />
-            ) : (
-              <Text style={styles.buttonText}>Create account</Text>
-            )}
-          </TouchableOpacity>
+            variant="brand"
+            disabled={!canSubmit}
+            loading={loading}
+          />
         </View>
 
         <View style={styles.footer}>
@@ -161,22 +156,6 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: C.robinEggBlue,
-  },
-  button: {
-    height: 56,
-    backgroundColor: C.sunshade,
-    borderRadius: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.4,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: C.white,
   },
   footer: {
     flexDirection: 'row',

@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   // Picker modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: C.overlay,
     justifyContent: 'flex-end',
   },
   pickerSheet: {

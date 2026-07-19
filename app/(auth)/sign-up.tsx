@@ -298,7 +298,7 @@ export default function SignUpScreen() {
             <Button
               label="Create account"
               onPress={handleSignUp}
-              variant="brand"
+              variant="primary"
               disabled={!canSubmit}
               loading={loading}
             />

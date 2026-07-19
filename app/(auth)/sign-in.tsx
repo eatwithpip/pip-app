@@ -81,7 +81,7 @@ export default function SignInScreen() {
           <Button
             label="Sign in"
             onPress={handleSignIn}
-            variant="brand"
+            variant="primary"
             disabled={!canSubmit}
             loading={loading}
           />

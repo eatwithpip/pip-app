@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { router } from 'expo-router';
@@ -21,11 +22,21 @@ import TextInputField from '@/components/ui/TextInputField';
 import { useAuth } from '@/context/AuthContext';
 import { C } from '@/constants/palette';
 
-const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
 const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
 const YEARS = Array.from({ length: new Date().getFullYear() - 1923 }, (_, i) =>
   String(new Date().getFullYear() - i)
 );
+
+function daysInMonth(month: string, year: string): number {
+  if (!month) return 31;
+  return new Date(Number(year) || 2000, Number(month), 0).getDate();
+}
+
+function isValidDate(day: string, month: string, year: string): boolean {
+  const d = Number(day), m = Number(month), y = Number(year);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
 
 // ─── SelectPicker ─────────────────────────────────────────────────────────────
 
@@ -108,8 +119,17 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const availableDays = Array.from(
+    { length: daysInMonth(birthMonth, birthYear) },
+    (_, i) => String(i + 1).padStart(2, '0')
+  );
+
   const validateAge = (day: string, month: string, year: string) => {
     if (day && month && year) {
+      if (!isValidDate(day, month, year)) {
+        setDobError('Please select a valid date');
+        return;
+      }
       setDobError(
         isAtLeast16(day, month, year)
           ? ''
@@ -124,13 +144,19 @@ export default function SignUpScreen() {
   };
 
   const handleBirthMonth = (val: string) => {
+    const max = daysInMonth(val, birthYear);
+    const clampedDay = Number(birthDay) > max ? '' : birthDay;
     setBirthMonth(val);
-    validateAge(birthDay, val, birthYear);
+    if (clampedDay !== birthDay) setBirthDay(clampedDay);
+    validateAge(clampedDay, val, birthYear);
   };
 
   const handleBirthYear = (val: string) => {
+    const max = daysInMonth(birthMonth, val);
+    const clampedDay = Number(birthDay) > max ? '' : birthDay;
     setBirthYear(val);
-    validateAge(birthDay, birthMonth, val);
+    if (clampedDay !== birthDay) setBirthDay(clampedDay);
+    validateAge(clampedDay, birthMonth, val);
   };
 
   const dobComplete = !!(birthDay && birthMonth && birthYear);
@@ -147,7 +173,7 @@ export default function SignUpScreen() {
     setLoading(true);
     try {
       await signUp(email.trim(), password);
-      // AuthProvider will detect the new session and _layout will redirect to onboarding
+      await AsyncStorage.setItem('pending_dob', `${birthYear}-${birthMonth}-${birthDay}`);
     } catch (err: any) {
       Alert.alert('Sign up failed', err.message ?? 'Something went wrong. Please try again.');
     } finally {
@@ -180,7 +206,7 @@ export default function SignUpScreen() {
               <View style={styles.birthdayRow}>
                 <View style={styles.birthdayCol}>
                   <Text style={styles.sublabel}>Day</Text>
-                  <SelectPicker value={birthDay} options={DAYS} onChange={handleBirthDay} placeholder="DD" />
+                  <SelectPicker value={birthDay} options={availableDays} onChange={handleBirthDay} placeholder="DD" />
                 </View>
                 <View style={styles.birthdayCol}>
                   <Text style={styles.sublabel}>Month</Text>

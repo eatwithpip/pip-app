@@ -3,6 +3,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useOnboarding } from '@/context/OnboardingContext';
 import {
   Image,
@@ -185,14 +186,17 @@ export default function Step1Screen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isComplete) return;
+    const pendingDob = await AsyncStorage.getItem('pending_dob');
+    if (pendingDob) await AsyncStorage.removeItem('pending_dob');
     update({
       name: firstName,
       gender,
       dietaryPreference: dietary,
       location,
       profileImageUri: profileImage,
+      ...(pendingDob ? { dateOfBirth: pendingDob } : {}),
     });
     router.push('/onboarding/step2' as never);
   };

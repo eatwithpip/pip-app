@@ -44,8 +44,8 @@ export default function SignInScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+          <Text style={styles.title}>Sign in to Pip</Text>
+          <View style={styles.divider} />
         </View>
 
         <View style={styles.form}>
@@ -104,16 +104,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   title: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: '700',
     color: C.text,
-    lineHeight: 42,
-    marginBottom: 10,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  subtitle: {
-    fontSize: 16,
-    color: C.doveGrey,
-    lineHeight: 22,
+  divider: {
+    height: 1,
+    backgroundColor: C.nobel,
   },
   form: {
     gap: 20,

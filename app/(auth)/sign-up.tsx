@@ -167,10 +167,8 @@ export default function SignUpScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Create your account</Text>
-            <Text style={styles.subtitle}>
-              Join Eat With Pip and start your gut health journey
-            </Text>
+            <Text style={styles.title}>Sign up to Pip</Text>
+            <View style={styles.divider} />
           </View>
 
           <View style={styles.form}>
@@ -266,16 +264,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   title: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: '700',
     color: C.text,
-    lineHeight: 42,
-    marginBottom: 10,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  subtitle: {
-    fontSize: 16,
-    color: C.doveGrey,
-    lineHeight: 22,
+  divider: {
+    height: 1,
+    backgroundColor: C.nobel,
   },
   form: {
     backgroundColor: C.white,

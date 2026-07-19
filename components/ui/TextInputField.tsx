@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '400',
     lineHeight: 32,
+    // outlineStyle 'none' is a web-only value (react-native-web) that RN's TextStyle type omits
+    outlineStyle: 'none' as any,
     outlineWidth: 0,
     fontFamily: FONTS.regular,
     color: C.text,

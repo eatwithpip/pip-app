@@ -58,6 +58,23 @@ create policy "own goals insert"
 create policy "own goals delete"
   on public.user_goals for delete using (auth.uid() = user_id);
 
+-- ── Email existence check (used by forgot-password flow) ───
+-- security definer lets the function query auth.users without
+-- exposing that table directly to the anon role.
+
+create or replace function public.check_email_exists(email_to_check text)
+returns boolean
+language sql
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from auth.users where email = email_to_check
+  );
+$$;
+
+grant execute on function public.check_email_exists(text) to anon;
+
 -- ── Storage bucket for avatars ──────────────────────────────
 
 insert into storage.buckets (id, name, public)

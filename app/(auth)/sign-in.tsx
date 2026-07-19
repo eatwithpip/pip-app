@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/ui/Button';
 import Text from '@/components/ui/Text';
 import TextInputField from '@/components/ui/TextInputField';
+import TextLink from '@/components/ui/TextLink';
 import { useAuth } from '@/context/AuthContext';
 import { C } from '@/constants/palette';
 
@@ -76,6 +77,12 @@ export default function SignInScreen() {
             variant="brand"
             disabled={!canSubmit}
             loading={loading}
+          />
+
+          <TextLink
+            label="Forgot password?"
+            onPress={() => router.push('/(auth)/forgot-password-request')}
+            style={styles.forgotLink}
           />
         </View>
 
@@ -143,5 +150,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: C.cornflowerBlue,
+  },
+  forgotLink: {
+    textAlign: 'right',
   },
 });

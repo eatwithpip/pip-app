@@ -83,9 +83,12 @@ function RootLayoutNav() {
       const code = queryParams?.code as string | undefined;
       if (!code) return;
       processingDeepLink.current = true;
-      await supabase.auth.exchangeCodeForSession(code);
-      processingDeepLink.current = false;
-      // PASSWORD_RECOVERY event fires after exchange and triggers navigation
+      try {
+        await supabase.auth.exchangeCodeForSession(code);
+        // PASSWORD_RECOVERY event fires after exchange and triggers navigation
+      } finally {
+        processingDeepLink.current = false;
+      }
     };
 
     Linking.getInitialURL().then(url => { if (url) exchange(url); });

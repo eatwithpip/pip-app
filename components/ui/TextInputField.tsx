@@ -1,6 +1,7 @@
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { useState } from 'react';
 import {
+  BlurEvent,
   StyleSheet,
   TextInput,
   TextInputProps,
@@ -11,6 +12,7 @@ import {
 import Text from '@/components/ui/Text';
 import { C } from '@/constants/palette';
 import { FONTS } from '@/constants/typography';
+import { EMAIL_REGEX } from '@/constants/validation';
 
 type InputType = 'text' | 'email' | 'password';
 
@@ -20,8 +22,6 @@ interface Props extends Omit<TextInputProps, 'secureTextEntry' | 'keyboardType'>
   required?: boolean;
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function TextInputField({ label, type = 'text', required = false, style, onBlur, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +30,7 @@ export default function TextInputField({ label, type = 'text', required = false,
   const isPassword = type === 'password';
   const isEmail = type === 'email';
 
-  const handleBlur = (e: any) => {
+  const handleBlur = (e: BlurEvent) => {
     setFocused(false);
     if (isEmail && rest.value && !EMAIL_REGEX.test(rest.value as string)) {
       setEmailError('Please enter a valid email address');

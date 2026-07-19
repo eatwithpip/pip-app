@@ -13,9 +13,8 @@ import Button from '@/components/ui/Button';
 import Text from '@/components/ui/Text';
 import TextInputField from '@/components/ui/TextInputField';
 import { C } from '@/constants/palette';
+import { EMAIL_REGEX } from '@/constants/validation';
 import { supabase } from '@/lib/supabase';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordRequestScreen() {
   const [email, setEmail] = useState('');

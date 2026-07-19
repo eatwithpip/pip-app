@@ -20,6 +20,7 @@ export default function ResetPasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const passwordMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
   const canSubmit = newPassword.length >= 6 && newPassword === confirmPassword;
 
   const handleSubmit = async () => {
@@ -69,8 +70,12 @@ export default function ResetPasswordScreen() {
             placeholder="Repeat your password"
           />
 
+          {passwordMismatch && (
+            <Text style={styles.mismatchError}>Passwords do not match</Text>
+          )}
+
           <Button
-            label="Sign in"
+            label="Update password"
             onPress={handleSubmit}
             variant="brand"
             disabled={!canSubmit}
@@ -105,6 +110,11 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: C.nobel,
+  },
+  mismatchError: {
+    fontSize: 13,
+    color: C.error,
+    marginTop: -8,
   },
   form: {
     backgroundColor: C.white,

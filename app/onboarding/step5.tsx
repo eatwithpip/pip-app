@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { PanResponder, ScrollView, StyleSheet, View } from 'react-native';
+import { PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ContinueButton from '@/components/onboarding/ContinueButton';
@@ -126,11 +126,16 @@ const sliderStyles = StyleSheet.create({
     height: THUMB,
     borderRadius: THUMB / 2,
     backgroundColor: C.sunshade,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
     elevation: 3,
+    ...Platform.select({
+      web: { boxShadow: '0px 1px 3px rgba(0,0,0,0.15)' },
+      default: {
+        shadowColor: '#000',
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+      },
+    }),
   },
   labelsRow: {
     flexDirection: 'row',

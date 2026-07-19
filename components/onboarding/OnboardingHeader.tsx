@@ -8,18 +8,23 @@ import { C } from '@/constants/palette';
 interface Props {
   title: string;
   onBack?: () => void;
+  showBack?: boolean;
 }
 
-export default function OnboardingHeader({ title, onBack }: Props) {
+export default function OnboardingHeader({ title, onBack, showBack = true }: Props) {
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={onBack ?? (() => router.back())}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="chevron-back" size={16} color={C.text} />
-      </TouchableOpacity>
+      {showBack ? (
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={onBack ?? (() => router.back())}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="chevron-back" size={16} color={C.text} />
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.spacer} />
+      )}
       <Text style={styles.title}>{title}</Text>
       <View style={styles.spacer} />
     </View>

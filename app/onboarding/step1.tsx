@@ -3,6 +3,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useOnboarding } from '@/context/OnboardingContext';
 import {
   Image,
@@ -23,12 +24,6 @@ import OnboardingHeader from '@/components/onboarding/OnboardingHeader';
 import StepDots from '@/components/onboarding/StepDots';
 import { C } from '@/constants/palette';
 import { FONTS } from '@/constants/typography';
-
-const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
-const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-const YEARS = Array.from({ length: new Date().getFullYear() - 1923 }, (_, i) =>
-  String(new Date().getFullYear() - i)
-);
 
 const UK_COUNTIES = [
   'Avon', 'Bedfordshire', 'Berkshire', 'Bristol', 'Buckinghamshire',
@@ -170,15 +165,12 @@ export default function Step1Screen() {
   const { update } = useOnboarding();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
-  const [birthDay, setBirthDay] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthYear, setBirthYear] = useState('');
   const [gender, setGender] = useState('');
   const [dietary, setDietary] = useState('');
   const [location, setLocation] = useState('');
   const [nameFocused, setNameFocused] = useState(false);
 
-  const isComplete = !!(firstName && birthDay && birthMonth && birthYear && gender && dietary);
+  const isComplete = !!(firstName && gender && dietary);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -194,15 +186,17 @@ export default function Step1Screen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isComplete) return;
+    const pendingDob = await AsyncStorage.getItem('pending_dob');
+    if (pendingDob) await AsyncStorage.removeItem('pending_dob');
     update({
       name: firstName,
-      dateOfBirth: `${birthYear}-${birthMonth}-${birthDay}`,
       gender,
       dietaryPreference: dietary,
       location,
       profileImageUri: profileImage,
+      ...(pendingDob ? { dateOfBirth: pendingDob } : {}),
     });
     router.push('/onboarding/step2' as never);
   };
@@ -215,7 +209,7 @@ export default function Step1Screen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <OnboardingHeader title="Getting to know you" />
+        <OnboardingHeader title="Getting to know you" showBack={false} />
         <StepDots total={5} current={1} />
 
         {/* Page title */}
@@ -254,27 +248,6 @@ export default function Step1Screen() {
             autoCapitalize="words"
             returnKeyType="done"
           />
-        </View>
-
-        {/* Birthday */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>
-            Birthday <Text style={styles.required}>*</Text>
-          </Text>
-          <View style={styles.birthdayRow}>
-            <View style={styles.birthdayCol}>
-              <Text style={styles.sublabel}>Day</Text>
-              <SelectPicker value={birthDay} options={DAYS} onChange={setBirthDay} placeholder="DD" />
-            </View>
-            <View style={styles.birthdayCol}>
-              <Text style={styles.sublabel}>Month</Text>
-              <SelectPicker value={birthMonth} options={MONTHS} onChange={setBirthMonth} placeholder="MM" />
-            </View>
-            <View style={styles.birthdayCol}>
-              <Text style={styles.sublabel}>Year</Text>
-              <SelectPicker value={birthYear} options={YEARS} onChange={setBirthYear} placeholder="YYYY" />
-            </View>
-          </View>
         </View>
 
         {/* Gender */}
@@ -389,13 +362,6 @@ const styles = StyleSheet.create({
   required: {
     color: C.error,
   },
-  sublabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: C.text,
-    marginBottom: 8,
-  },
-
   // Text input
   textInput: {
     height: 48,
@@ -410,15 +376,6 @@ const styles = StyleSheet.create({
   },
   textInputFocused: {
     borderColor: C.robinEggBlue,
-  },
-
-  // Birthday row
-  birthdayRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  birthdayCol: {
-    flex: 1,
   },
 
   // Select button

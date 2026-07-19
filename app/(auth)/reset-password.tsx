@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,26 +12,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/ui/Button';
 import Text from '@/components/ui/Text';
 import TextInputField from '@/components/ui/TextInputField';
-import TextLink from '@/components/ui/TextLink';
-import { useAuth } from '@/context/AuthContext';
 import { C } from '@/constants/palette';
+import { supabase } from '@/lib/supabase';
 
-export default function SignInScreen() {
-  const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function ResetPasswordScreen() {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = email.trim().length > 0 && password.length >= 6;
+  const passwordMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
+  const canSubmit = newPassword.length >= 6 && newPassword === confirmPassword;
 
-  const handleSignIn = async () => {
+  const handleSubmit = async () => {
     if (!canSubmit || loading) return;
     setLoading(true);
     try {
-      await signIn(email.trim(), password);
-      // AuthProvider will detect the session and _layout will redirect
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      router.replace('/(auth)/sign-in');
     } catch (err: any) {
-      Alert.alert('Sign in failed', err.message ?? 'Invalid email or password.');
+      Alert.alert('Error', err.message ?? 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -45,52 +44,43 @@ export default function SignInScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Sign in to Pip</Text>
+          <Text style={styles.title}>Reset password</Text>
           <View style={styles.divider} />
         </View>
 
         <View style={styles.form}>
           <TextInputField
-            label="Email"
-            type="email"
+            label="New password"
+            type="password"
             required
-            value={email}
-            onChangeText={setEmail}
+            value={newPassword}
+            onChangeText={setNewPassword}
             returnKeyType="next"
-            placeholder="you@example.com"
+            placeholder="At least 6 characters"
           />
 
           <TextInputField
-            label="Password"
+            label="Confirm password"
             type="password"
             required
-            value={password}
-            onChangeText={setPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             returnKeyType="done"
-            onSubmitEditing={handleSignIn}
-            placeholder="Your password"
+            onSubmitEditing={handleSubmit}
+            placeholder="Repeat your password"
           />
 
+          {passwordMismatch && (
+            <Text style={styles.mismatchError}>Passwords do not match</Text>
+          )}
+
           <Button
-            label="Sign in"
-            onPress={handleSignIn}
+            label="Update password"
+            onPress={handleSubmit}
             variant="brand"
             disabled={!canSubmit}
             loading={loading}
           />
-
-          <TextLink
-            label="Forgot password?"
-            onPress={() => router.push('/(auth)/forgot-password-request')}
-            style={styles.forgotLink}
-          />
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
-            <Text style={styles.footerLink}>Sign up</Text>
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -121,10 +111,15 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: C.nobel,
   },
+  mismatchError: {
+    fontSize: 13,
+    color: C.error,
+    marginTop: -8,
+  },
   form: {
-    gap: 20,
     backgroundColor: C.white,
     borderRadius: 12,
+    gap: 20,
     padding: 20,
     ...Platform.select({
       web: { boxShadow: '4px 4px 8px 0px rgba(238, 221, 201, 0.2)' },
@@ -136,22 +131,5 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 32,
-  },
-  footerText: {
-    fontSize: 15,
-    color: C.doveGrey,
-  },
-  footerLink: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: C.cornflowerBlue,
-  },
-  forgotLink: {
-    textAlign: 'right',
   },
 });

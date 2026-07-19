@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { useRef, useState } from 'react';
 import {
   Alert,
@@ -23,6 +23,7 @@ export default function ForgotPasswordRequestScreen() {
   const [emailKnown, setEmailKnown] = useState(false);
   const [notFoundError, setNotFoundError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const checkEmailExists = async (trimmed: string) => {
@@ -63,13 +64,11 @@ export default function ForgotPasswordRequestScreen() {
     if (!emailKnown || loading) return;
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: Linking.createURL('reset-password'),
+      });
       if (error) throw error;
-      Alert.alert(
-        'Check your email',
-        `We've sent a password reset link to ${email.trim()}`,
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      setSent(true);
     } catch (err: any) {
       Alert.alert('Error', err.message ?? 'Something went wrong. Please try again.');
     } finally {
@@ -107,9 +106,15 @@ export default function ForgotPasswordRequestScreen() {
             label="Send link to email"
             onPress={handleSubmit}
             variant="brand"
-            disabled={!emailKnown || checking}
+            disabled={!emailKnown || checking || sent}
             loading={loading || checking}
           />
+
+          {sent && (
+            <Text style={styles.successMessage}>
+              Check your inbox and click the link to set a new password
+            </Text>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -160,5 +165,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: C.error,
     marginTop: -8,
+  },
+  successMessage: {
+    fontSize: 14,
+    color: C.success,
+    textAlign: 'center',
   },
 });

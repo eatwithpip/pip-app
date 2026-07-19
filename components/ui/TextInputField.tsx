@@ -20,12 +20,25 @@ interface Props extends Omit<TextInputProps, 'secureTextEntry' | 'keyboardType'>
   required?: boolean;
 }
 
-export default function TextInputField({ label, type = 'text', required = false, style, ...rest }: Props) {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function TextInputField({ label, type = 'text', required = false, style, onBlur, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const isPassword = type === 'password';
   const isEmail = type === 'email';
+
+  const handleBlur = (e: any) => {
+    setFocused(false);
+    if (isEmail && rest.value && !EMAIL_REGEX.test(rest.value as string)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+    onBlur?.(e);
+  };
 
   return (
     <View style={styles.wrapper}>
@@ -33,7 +46,7 @@ export default function TextInputField({ label, type = 'text', required = false,
         {label}
         {required && <Text style={styles.asterisk}> *</Text>}
       </Text>
-      <View style={[styles.inputRow, focused && styles.inputRowFocused]}>
+      <View style={[styles.inputRow, focused && styles.inputRowFocused, !!emailError && styles.inputRowError]}>
         <TextInput
           style={[styles.input, style]}
           secureTextEntry={isPassword && !showPassword}
@@ -42,7 +55,7 @@ export default function TextInputField({ label, type = 'text', required = false,
           autoCorrect={!isEmail && !isPassword}
           placeholderTextColor={C.nobel}
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onBlur={handleBlur}
           {...rest}
         />
         {isPassword && (
@@ -59,6 +72,7 @@ export default function TextInputField({ label, type = 'text', required = false,
           </TouchableOpacity>
         )}
       </View>
+      {!!emailError && <Text style={styles.errorText}>{emailError}</Text>}
     </View>
   );
 }
@@ -84,6 +98,9 @@ const styles = StyleSheet.create({
   inputRowFocused: {
     borderColor: C.robinEggBlue,
   },
+  inputRowError: {
+    borderColor: C.error,
+  },
   input: {
     flex: 1,
     paddingHorizontal: 16,
@@ -98,6 +115,10 @@ const styles = StyleSheet.create({
   asterisk: {
     color: C.error,
     fontWeight: '700',
+  },
+  errorText: {
+    fontSize: 13,
+    color: C.error,
   },
   eyeButton: {
     paddingHorizontal: 12,

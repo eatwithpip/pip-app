@@ -1,10 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import Text from '@/components/ui/Text';
 import { C } from '@/constants/palette';
+import { useProfile } from '@/hooks/useProfile';
 
 interface HeaderProps {
   title: string;
@@ -12,11 +11,8 @@ interface HeaderProps {
 }
 
 export default function Header({ title, isPremium = false }: HeaderProps) {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    AsyncStorage.getItem('profileImage').then(setProfileImage);
-  }, []);
+  const { data: profile } = useProfile();
+  const profileImage = profile?.profile_image_url ?? null;
 
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',

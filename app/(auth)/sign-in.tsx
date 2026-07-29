@@ -49,6 +49,13 @@ export default function SignInScreen() {
           <View style={styles.divider} />
         </View>
 
+        <View style={styles.topFooter}>
+          <Text style={styles.footerText}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
+            <Text style={styles.footerLink}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.form}>
           <TextInputField
             label="Email"
@@ -74,7 +81,7 @@ export default function SignInScreen() {
           <Button
             label="Sign in"
             onPress={handleSignIn}
-            variant="brand"
+            variant="primary"
             disabled={!canSubmit}
             loading={loading}
           />
@@ -84,13 +91,6 @@ export default function SignInScreen() {
             onPress={() => router.push('/(auth)/forgot-password-request')}
             style={styles.forgotLink}
           />
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
-            <Text style={styles.footerLink}>Sign up</Text>
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -137,10 +137,10 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  footer: {
+  topFooter: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
+    marginBottom: 24,
   },
   footerText: {
     fontSize: 15,

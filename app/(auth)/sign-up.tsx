@@ -6,7 +6,7 @@ import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  Modal,
+  Modal as RNModal,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 import Text from '@/components/ui/Text';
 import TextInputField from '@/components/ui/TextInputField';
 import { useAuth } from '@/context/AuthContext';
@@ -70,7 +71,7 @@ function SelectPicker({ value, options, onChange, placeholder = 'Select...' }: S
         <Ionicons name="chevron-down" size={16} color={C.doveGrey} />
       </TouchableOpacity>
 
-      <Modal visible={visible} transparent animationType="slide" onRequestClose={() => setVisible(false)}>
+      <RNModal visible={visible} transparent animationType="slide" onRequestClose={() => setVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setVisible(false)}>
           <Pressable style={styles.pickerSheet} onPress={() => {}}>
             <View style={styles.pickerHeader}>
@@ -92,7 +93,7 @@ function SelectPicker({ value, options, onChange, placeholder = 'Select...' }: S
             </Picker>
           </Pressable>
         </Pressable>
-      </Modal>
+      </RNModal>
     </>
   );
 }
@@ -106,6 +107,25 @@ function isAtLeast16(day: string, month: string, year: string): boolean {
   return dob <= cutoff;
 }
 
+// ─── Checkbox ─────────────────────────────────────────────────────────────────
+
+function Checkbox({ checked, onToggle }: { checked: boolean; onToggle: () => void }) {
+  return (
+    <TouchableOpacity
+      style={[styles.checkbox, checked && styles.checkboxChecked]}
+      onPress={onToggle}
+      activeOpacity={0.7}
+    >
+      {checked && <Ionicons name="checkmark" size={14} color={C.white} />}
+    </TouchableOpacity>
+  );
+}
+
+// ─── Legal content ──────────────────────────────────────────────────────────
+
+const LOREM_PARAGRAPH =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function SignUpScreen() {
@@ -117,6 +137,8 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
   const [loading, setLoading] = useState(false);
 
   const availableDays = Array.from(
@@ -166,7 +188,8 @@ export default function SignUpScreen() {
     !dobError &&
     email.trim().length > 0 &&
     password.length >= 6 &&
-    password === confirmPassword;
+    password === confirmPassword &&
+    agreedToTerms;
 
   const handleSignUp = async () => {
     if (!canSubmit || loading) return;
@@ -195,6 +218,13 @@ export default function SignUpScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Sign up to Pip</Text>
             <View style={styles.divider} />
+          </View>
+
+          <View style={styles.topFooter}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
+              <Text style={styles.footerLink}>Sign in</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.form}>
@@ -251,23 +281,50 @@ export default function SignUpScreen() {
               placeholder="Repeat your password"
             />
 
+            <View style={styles.termsRow}>
+              <Checkbox checked={agreedToTerms} onToggle={() => setAgreedToTerms((v) => !v)} />
+              <Text style={styles.termsText}>
+                By signing up you are agree to our{' '}
+                <Text style={styles.termsLink} onPress={() => setLegalModal('terms')}>
+                  Terms of Service
+                </Text>{' '}
+                and{' '}
+                <Text style={styles.termsLink} onPress={() => setLegalModal('privacy')}>
+                  Privacy Policy
+                </Text>
+              </Text>
+            </View>
+
             <Button
               label="Create account"
               onPress={handleSignUp}
-              variant="brand"
+              variant="primary"
               disabled={!canSubmit}
               loading={loading}
             />
-          </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
-              <Text style={styles.footerLink}>Sign in</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={legalModal === 'terms'}
+        title="Terms of Service"
+        onClose={() => setLegalModal(null)}
+      >
+        <Text style={styles.legalBody}>{LOREM_PARAGRAPH}</Text>
+        <Text style={styles.legalSubheading}>Lorem Ipsum</Text>
+        <Text style={styles.legalBody}>{LOREM_PARAGRAPH}</Text>
+      </Modal>
+      <Modal
+        visible={legalModal === 'privacy'}
+        title="Privacy Policy"
+        onClose={() => setLegalModal(null)}
+      >
+        <Text style={styles.legalBody}>{LOREM_PARAGRAPH}</Text>
+        <Text style={styles.legalSubheading}>Lorem Ipsum</Text>
+        <Text style={styles.legalBody}>{LOREM_PARAGRAPH}</Text>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -392,10 +449,10 @@ const styles = StyleSheet.create({
     color: C.robinEggBlue,
     fontWeight: '600',
   },
-  footer: {
+  topFooter: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
+    marginBottom: 24,
   },
   footerText: {
     fontSize: 15,
@@ -405,5 +462,47 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: C.cornflowerBlue,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: C.robinEggBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: C.robinEggBlue,
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    color: C.text,
+  },
+  termsLink: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: C.cornflowerBlue,
+  },
+  legalSubheading: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  legalBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: C.doveGrey,
   },
 });

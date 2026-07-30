@@ -8,9 +8,10 @@ import { useProfile } from '@/hooks/useProfile';
 interface HeaderProps {
   title: string;
   isPremium?: boolean;
+  showDate?: boolean;
 }
 
-export default function Header({ title, isPremium = false }: HeaderProps) {
+export default function Header({ title, isPremium = false, showDate = true }: HeaderProps) {
   const { data: profile } = useProfile();
   const profileImage = profile?.profile_image_url ?? null;
 
@@ -23,8 +24,11 @@ export default function Header({ title, isPremium = false }: HeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.text}>
-        <Text style={styles.date}>{today}</Text>
-        {/* <Text style={styles.heading}>{title}</Text> */}
+        {showDate ? (
+          <Text style={styles.date}>{today}</Text>
+        ) : (
+          <Text style={styles.heading}>{title}</Text>
+        )}
       </View>
 
       <View style={[styles.avatarRing, isPremium && styles.premiumRing]}>

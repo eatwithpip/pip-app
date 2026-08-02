@@ -50,7 +50,10 @@ export function useDailyLog() {
         .upsert(rows, { onConflict: 'user_id,goal_id,log_date' });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['weekly-goal-stats', user?.id] });
+    },
   });
 
   return { ...query, submit };

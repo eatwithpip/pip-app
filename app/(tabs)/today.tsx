@@ -16,6 +16,7 @@ export default function TodayScreen() {
   const { data: goals = [] } = useUserGoals();
   const { data: savedScores, submit } = useDailyLog();
   const [scores, setScores] = useState<Record<string, number>>({});
+  const hasSubmittedToday = !!savedScores && Object.keys(savedScores).length > 0;
 
   // Fill in each goal's score once from today's saved log; a new day means
   // no saved rows yet, so this naturally lands on 0 without any manual reset.
@@ -55,7 +56,7 @@ export default function TodayScreen() {
                 ))}
 
                 <Button
-                  label={submit.isPending ? 'Submitting…' : 'Submit'}
+                  label={submit.isPending ? 'Submitting…' : hasSubmittedToday ? 'Edit' : 'Submit'}
                   onPress={() => submit.mutate(scores)}
                   variant="brand"
                   size="small"

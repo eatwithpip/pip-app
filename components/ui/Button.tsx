@@ -4,11 +4,13 @@ import Text from '@/components/ui/Text';
 import { C } from '@/constants/palette';
 
 export type ButtonVariant = 'primary' | 'brand' | 'outline';
+export type ButtonSize = 'default' | 'small';
 
 interface ButtonProps {
   label: string;
   onPress: () => void;
   variant?: ButtonVariant;
+  size?: ButtonSize;
   disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -18,11 +20,13 @@ export default function Button({
   label,
   onPress,
   variant = 'primary',
+  size = 'default',
   disabled = false,
   loading = false,
   style,
 }: ButtonProps) {
   const isOutline = variant === 'outline';
+  const isSmall = size === 'small';
 
   return (
     <TouchableOpacity
@@ -32,6 +36,7 @@ export default function Button({
         variant === 'brand' && (disabled ? styles.brandDisabled : styles.brand),
         isOutline && styles.outline,
         isOutline && disabled && styles.opacityDisabled,
+        isSmall && styles.small,
         style,
       ]}
       onPress={onPress}
@@ -41,7 +46,9 @@ export default function Button({
       {loading ? (
         <ActivityIndicator color={isOutline ? C.text : C.white} />
       ) : (
-        <Text style={[styles.label, isOutline && styles.outlineLabel]}>{label}</Text>
+        <Text style={[styles.label, isOutline && styles.outlineLabel, isSmall && styles.smallLabel]}>
+          {label}
+        </Text>
       )}
     </TouchableOpacity>
   );
@@ -75,6 +82,9 @@ const styles = StyleSheet.create({
   opacityDisabled: {
     opacity: 0.4,
   },
+  small: {
+    height: 42,
+  },
   label: {
     fontSize: 16,
     fontWeight: '600',
@@ -83,5 +93,8 @@ const styles = StyleSheet.create({
   },
   outlineLabel: {
     color: C.text,
+  },
+  smallLabel: {
+    fontSize: 16,
   },
 });

@@ -22,6 +22,7 @@ export const C = {
 
   // Status
   success: '#40C776',
+  successLight: '#D9F5E3',
   error: '#FA4444',
 
   // Tooltip

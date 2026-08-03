@@ -8,10 +8,10 @@ import Modal from '@/components/ui/Modal';
 import Tag from '@/components/ui/Tag';
 import Text from '@/components/ui/Text';
 import { DIFFICULTY_OPTIONS } from '@/constants/difficulty';
-import { type Goal, type Objective } from '@/constants/goals';
+import { type Objective } from '@/constants/goals';
 import { C } from '@/constants/palette';
 import { useProfile } from '@/hooks/useProfile';
-import { useUserGoals } from '@/hooks/useUserGoals';
+import { useUserGoals, type UserGoal } from '@/hooks/useUserGoals';
 import {
   emptyRollingWeekDays,
   type GoalWeekStats,
@@ -25,6 +25,17 @@ const EMPTY_WEEK_STATS: GoalWeekStats = {
 
 const BAR_TRACK_HEIGHT = 50;
 const MIN_BAR_FILL_HEIGHT = 4;
+
+const GOAL_WINDOW_WEEKS = 12;
+const DAY_MS = 1000 * 60 * 60 * 24;
+
+function goalWindowProgress(selectedAt: string) {
+  const daysElapsed = Math.max(0, (Date.now() - new Date(selectedAt).getTime()) / DAY_MS);
+  const totalDays = GOAL_WINDOW_WEEKS * 7;
+  const week = Math.min(GOAL_WINDOW_WEEKS, Math.floor(daysElapsed / 7) + 1);
+  const fraction = Math.min(1, daysElapsed / totalDays);
+  return { week, fraction };
+}
 
 function feelingLabel(avg?: number) {
   if (avg === undefined) return 'No check-ins yet this week';
@@ -41,7 +52,7 @@ const TREND_COPY = {
 };
 
 interface GoalCardProps {
-  goal: Goal;
+  goal: UserGoal;
   objective?: Objective;
   weekStats: GoalWeekStats;
 }
@@ -50,6 +61,7 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
   const [showExamples, setShowExamples] = useState(false);
   const hasExamples = !!objective?.foodExamples.length;
   const { thisWeekAvg, trend, checkedInDays, days } = weekStats;
+  const { week, fraction } = goalWindowProgress(goal.selectedAt);
 
   return (
     <View style={styles.card}>
@@ -63,6 +75,13 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
           )}
         </View>
         <Text style={styles.goalName}>{goal.name}</Text>
+      </View>
+
+      <View style={styles.progressSection}>
+        <Text style={styles.progressLabel}>Week {week} of {GOAL_WINDOW_WEEKS}</Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${fraction * 100}%` }]} />
+        </View>
       </View>
 
       {objective && <Text style={styles.objective}>{objective.text}</Text>}
@@ -187,6 +206,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: C.text,
     lineHeight: 32,
+  },
+  progressSection: {
+    gap: 6,
+  },
+  progressLabel: {
+    fontSize: 13,
+    color: C.doveGrey,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: C.nobel,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: C.success,
   },
   objective: {
     fontSize: 15,

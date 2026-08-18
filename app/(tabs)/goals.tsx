@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import ObjectiveTracker from '@/components/goals/ObjectiveTracker';
 import Header from '@/components/ui/Header';
 import Modal from '@/components/ui/Modal';
 import Tag from '@/components/ui/Tag';
@@ -84,7 +85,7 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
         </View>
       </View>
 
-      {objective && <Text style={styles.objective}>{objective.text}</Text>}
+      {objective && <ObjectiveTracker goalId={goal.id} objective={objective} />}
 
       <View style={styles.checkInBox}>
         <Text style={styles.checkInLabel}>Daily check-in</Text>
@@ -178,9 +179,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 32,
-    gap: 24,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    gap: 12,
   },
   scrollContent: {
     gap: 40,
@@ -224,11 +225,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
     backgroundColor: C.success,
-  },
-  objective: {
-    fontSize: 15,
-    color: C.text,
-    lineHeight: 21,
   },
   checkInBox: {
     borderWidth: 1,
@@ -308,7 +304,7 @@ const styles = StyleSheet.create({
     width: 28,
   },
   barTrack: {
-    width: 24,
+    width: 40,
     height: BAR_TRACK_HEIGHT,
     borderRadius: 8,
     backgroundColor: C.bg,
@@ -322,8 +318,9 @@ const styles = StyleSheet.create({
     backgroundColor: C.sunshade,
   },
   barDay: {
-    fontSize: 12,
+    fontSize: 24,
     color: C.doveGrey,
+    fontWeight: '700',
   },
   barDayActive: {
     color: C.sunshade,

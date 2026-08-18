@@ -38,6 +38,21 @@ create table if not exists public.daily_logs (
   unique(user_id, goal_id, log_date)
 );
 
+-- Objective logs (per-goal daily check-off of the assigned objective,
+-- independent of the objective's own target_frequency — a weekly-target
+-- objective can still be checked off any day; achievement against the
+-- target is derived client-side from these rows)
+create table if not exists public.objective_logs (
+  id         uuid default gen_random_uuid() primary key,
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  goal_id    text not null,
+  log_date   date not null default current_date,
+  completed  boolean not null default true,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null,
+  unique(user_id, goal_id, log_date)
+);
+
 -- ── PostgREST role grants (required in addition to RLS) ─────
 
 grant usage on schema public to anon, authenticated;
@@ -45,12 +60,14 @@ grant usage on schema public to anon, authenticated;
 grant select, insert, update on public.profiles to authenticated;
 grant select, insert, update, delete on public.user_goals to authenticated;
 grant select, insert, update on public.daily_logs to authenticated;
+grant select, insert, update on public.objective_logs to authenticated;
 
 -- ── Row Level Security ──────────────────────────────────────
 
-alter table public.profiles   enable row level security;
-alter table public.user_goals enable row level security;
-alter table public.daily_logs enable row level security;
+alter table public.profiles      enable row level security;
+alter table public.user_goals    enable row level security;
+alter table public.daily_logs    enable row level security;
+alter table public.objective_logs enable row level security;
 
 -- profiles
 create policy "own profile select"
@@ -81,6 +98,16 @@ create policy "own daily logs insert"
 
 create policy "own daily logs update"
   on public.daily_logs for update using (auth.uid() = user_id);
+
+-- objective_logs
+create policy "own objective logs select"
+  on public.objective_logs for select using (auth.uid() = user_id);
+
+create policy "own objective logs insert"
+  on public.objective_logs for insert with check (auth.uid() = user_id);
+
+create policy "own objective logs update"
+  on public.objective_logs for update using (auth.uid() = user_id);
 
 -- ── Email existence check (used by forgot-password flow) ───
 -- security definer lets the function query auth.users without

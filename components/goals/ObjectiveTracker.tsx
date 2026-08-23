@@ -15,6 +15,7 @@ interface ObjectiveTrackerProps {
 export default function ObjectiveTracker({ goalId, objective, selectedAt }: ObjectiveTrackerProps) {
   const { data: days = emptyObjectiveWeek(selectedAt), toggleDay } = useObjectiveLog(goalId, selectedAt);
   const achieved = isObjectiveAchieved(objective, days);
+  const frequencyLabel = objective.targetFrequency === 'daily' ? 'daily' : 'weekly';
 
   return (
     <View style={styles.container}>
@@ -48,9 +49,11 @@ export default function ObjectiveTracker({ goalId, objective, selectedAt }: Obje
       </View>
 
       {achieved && (
-        <View style={styles.achievedPill}>
-          <Ionicons name="flag" size={12} color={C.success} />
-          <Text style={styles.achievedPillText}>Weekly target hit</Text>
+        <View style={styles.achievedRow}>
+          <Text style={styles.achievedText}>
+            Amazing! You've completed your {frequencyLabel} objective!
+          </Text>
+          <Text style={styles.achievedEmoji}>🎉</Text>
         </View>
       )}
     </View>
@@ -98,19 +101,19 @@ const styles = StyleSheet.create({
     color: C.sunshade,
     fontWeight: '700',
   },
-  achievedPill: {
+  achievedRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    backgroundColor: C.successLight,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 8,
   },
-  achievedPillText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: C.success,
+  achievedText: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '700',
+    color: C.text,
+    lineHeight: 24,
+  },
+  achievedEmoji: {
+    fontSize: 28,
   },
 });

@@ -1,3 +1,5 @@
+import { type Goal, type Objective } from './goals';
+
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export interface DifficultyOption {
@@ -35,3 +37,14 @@ export const DIFFICULTY_OPTIONS: DifficultyOption[] = [
     objectiveDifficulty: 'Advanced',
   },
 ];
+
+// The objective a goal card should show is whichever one matches the
+// user's chosen experience level — shared by the Goals and Today screens
+// so they always agree on which objective is "the" current one.
+export function findObjective(
+  goal: Goal,
+  difficulty: ExperienceLevel | null | undefined
+): Objective | undefined {
+  const option = DIFFICULTY_OPTIONS.find(d => d.id === difficulty);
+  return goal.objectives.find(o => o.difficultyLevel === option?.objectiveDifficulty);
+}

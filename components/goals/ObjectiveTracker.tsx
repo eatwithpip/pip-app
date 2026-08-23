@@ -9,10 +9,11 @@ import { emptyObjectiveWeek, isObjectiveAchieved, useObjectiveLog } from '@/hook
 interface ObjectiveTrackerProps {
   goalId: string;
   objective: Objective;
+  selectedAt: string;
 }
 
-export default function ObjectiveTracker({ goalId, objective }: ObjectiveTrackerProps) {
-  const { data: days = emptyObjectiveWeek(), toggleDay } = useObjectiveLog(goalId);
+export default function ObjectiveTracker({ goalId, objective, selectedAt }: ObjectiveTrackerProps) {
+  const { data: days = emptyObjectiveWeek(selectedAt), toggleDay } = useObjectiveLog(goalId, selectedAt);
   const achieved = isObjectiveAchieved(objective, days);
 
   return (
@@ -25,12 +26,21 @@ export default function ObjectiveTracker({ goalId, objective }: ObjectiveTracker
             key={day.date}
             style={styles.dayColumn}
             onPress={() => toggleDay.mutate({ date: day.date, completed: !day.completed })}
+            disabled={day.disabled}
             hitSlop={4}
           >
-            <View style={[styles.circle, day.completed && styles.circleChecked]}>
+            <View
+              style={[styles.circle, day.completed && styles.circleChecked, day.disabled && styles.disabled]}
+            >
               {day.completed && <Ionicons name="checkmark" size={18} color={C.white} />}
             </View>
-            <Text style={[styles.dayLabel, day.completed && styles.dayLabelChecked]}>
+            <Text
+              style={[
+                styles.dayLabel,
+                day.completed && styles.dayLabelChecked,
+                day.disabled && styles.disabled,
+              ]}
+            >
               {day.label}
             </Text>
           </TouchableOpacity>
@@ -75,6 +85,9 @@ const styles = StyleSheet.create({
   },
   circleChecked: {
     backgroundColor: C.success,
+  },
+  disabled: {
+    opacity: 0.3,
   },
   dayLabel: {
     fontSize: 24,

@@ -7,6 +7,7 @@ import Header from '@/components/ui/Header';
 import Text from '@/components/ui/Text';
 import { findObjective } from '@/constants/difficulty';
 import { type Objective } from '@/constants/goals';
+import { GOAL_WINDOW_WEEKS } from '@/constants/goalWindow';
 import { C } from '@/constants/palette';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserGoals, type UserGoal } from '@/hooks/useUserGoals';
@@ -24,7 +25,6 @@ const EMPTY_WEEK_STATS: GoalWeekStats = {
 const BAR_TRACK_HEIGHT = 50;
 const MIN_BAR_FILL_HEIGHT = 4;
 
-const GOAL_WINDOW_WEEKS = 12;
 const DAY_MS = 1000 * 60 * 60 * 24;
 
 function goalWindowProgress(selectedAt: string) {
@@ -73,7 +73,9 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
         </View>
       </View>
 
-      {objective && <ObjectiveTracker goalId={goal.id} objective={objective} />}
+      {objective && (
+        <ObjectiveTracker goalId={goal.id} objective={objective} selectedAt={goal.selectedAt} />
+      )}
 
       <View style={styles.checkInBox}>
         <Text style={styles.checkInLabel}>Daily check-in</Text>

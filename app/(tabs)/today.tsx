@@ -26,7 +26,7 @@ export default function TodayScreen() {
   const hasSubmittedToday = !!savedScores && Object.keys(savedScores).length > 0;
 
   const goalObjectives = goals.flatMap(goal => {
-    const objective = findObjective(goal, profile?.difficulty);
+    const objective = findObjective(goal, goal.difficulty ?? profile?.difficulty);
     return objective ? [{ goal, objective }] : [];
   });
 

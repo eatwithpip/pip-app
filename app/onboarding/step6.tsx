@@ -97,7 +97,7 @@ export default function Step6Screen() {
       if (goalIds.length > 0) {
         await supabase.from('user_goals').delete().eq('user_id', userId);
         const { error: goalsError } = await supabase.from('user_goals').insert(
-          goalIds.map(goal_id => ({ user_id: userId, goal_id }))
+          goalIds.map(goal_id => ({ user_id: userId, goal_id, difficulty: onboarding.difficulty || null }))
         );
         if (goalsError) throw goalsError;
       }

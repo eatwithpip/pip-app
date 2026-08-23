@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import EscalationOffer from '@/components/goals/EscalationOffer';
 import ObjectiveExamplesHeader from '@/components/goals/ObjectiveExamplesHeader';
 import ObjectiveTracker from '@/components/goals/ObjectiveTracker';
 import Header from '@/components/ui/Header';
@@ -9,6 +10,8 @@ import { findObjective } from '@/constants/difficulty';
 import { type Objective } from '@/constants/goals';
 import { GOAL_WINDOW_WEEKS } from '@/constants/goalWindow';
 import { C } from '@/constants/palette';
+import { getPendingCheckpoint, useEscalateGoalDifficulty } from '@/hooks/useEscalation';
+import { useEscalationRollup, type RollupWeek } from '@/hooks/useEscalationRollup';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserGoals, type UserGoal } from '@/hooks/useUserGoals';
 import {
@@ -53,11 +56,17 @@ interface GoalCardProps {
   goal: UserGoal;
   objective?: Objective;
   weekStats: GoalWeekStats;
+  rollupWeeks?: RollupWeek[];
 }
 
-function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
+function GoalCard({ goal, objective, weekStats, rollupWeeks }: GoalCardProps) {
   const { thisWeekAvg, trend, checkedInDays, days } = weekStats;
   const { week, fraction } = goalWindowProgress(goal.selectedAt);
+  const pendingCheckpoint = objective ? getPendingCheckpoint(goal, objective, rollupWeeks) : undefined;
+  const { accept, decline } = useEscalateGoalDifficulty(
+    goal.id,
+    pendingCheckpoint?.checkpoint ?? 4
+  );
 
   return (
     <View style={styles.card}>
@@ -75,6 +84,16 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
 
       {objective && (
         <ObjectiveTracker goalId={goal.id} objective={objective} selectedAt={goal.selectedAt} />
+      )}
+
+      {pendingCheckpoint && (
+        <EscalationOffer
+          checkpoint={pendingCheckpoint.checkpoint}
+          nextTiers={pendingCheckpoint.nextTiers}
+          onAccept={level => accept.mutate(level)}
+          onDecline={() => decline.mutate()}
+          pending={accept.isPending || decline.isPending}
+        />
       )}
 
       <View style={styles.checkInBox}>
@@ -129,6 +148,7 @@ export default function GoalsScreen() {
   const { data: goals = [] } = useUserGoals();
   const { data: profile } = useProfile();
   const { data: weekStatsByGoal = {} } = useWeeklyGoalStats();
+  const { data: rollupByGoal = {} } = useEscalationRollup();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -143,8 +163,9 @@ export default function GoalsScreen() {
             <GoalCard
               key={goal.id}
               goal={goal}
-              objective={findObjective(goal, profile?.difficulty)}
+              objective={findObjective(goal, goal.difficulty ?? profile?.difficulty)}
               weekStats={weekStatsByGoal[goal.id] ?? EMPTY_WEEK_STATS}
+              rollupWeeks={rollupByGoal[goal.id]}
             />
           ))}
         </ScrollView>

@@ -10,13 +10,16 @@ import StepDots from '@/components/onboarding/StepDots';
 import Text from '@/components/ui/Text';
 import { DIFFICULTY_OPTIONS, type ExperienceLevel } from '@/constants/difficulty';
 import { C } from '@/constants/palette';
+import { useOnboarding } from '@/context/OnboardingContext';
 
 export default function Step3Screen() {
   const { goals } = useLocalSearchParams<{ goals: string }>();
+  const { update } = useOnboarding();
   const [selected, setSelected] = useState<ExperienceLevel | null>(null);
 
   const handleContinue = () => {
     if (!selected) return;
+    update({ difficulty: selected });
     router.push({ pathname: '/onboarding/step4', params: { goals, difficulty: selected } } as never);
   };
 

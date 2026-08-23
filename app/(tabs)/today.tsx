@@ -95,7 +95,11 @@ export default function TodayScreen() {
                       theme={goal.theme}
                       foodExamples={objective.foodExamples}
                     />
-                    <ObjectiveTracker goalId={goal.id} objective={objective} />
+                    <ObjectiveTracker
+                      goalId={goal.id}
+                      objective={objective}
+                      selectedAt={goal.selectedAt}
+                    />
                   </View>
                 ))}
               </View>

@@ -54,14 +54,20 @@ export function emptyObjectiveWeek(selectedAt: string): ObjectiveDay[] {
   }));
 }
 
-// Whether the objective's target has been met for the current calendar
-// week. Only meaningful for weekly-target objectives — a daily
-// objective's target is already represented by each day's own
-// checkbox, and monthly targets aren't evaluable from a 7-day window.
+// Whether the objective's target has been met — for a daily objective
+// that's just today's checkbox, for a weekly one it's targetCount
+// check-ins within the current calendar week. Monthly targets aren't
+// evaluable from a 7-day window, so they never report achieved here.
 export function isObjectiveAchieved(objective: Objective, days: ObjectiveDay[]) {
-  if (objective.targetFrequency !== 'weekly') return false;
-  const completedCount = days.filter(d => d.completed).length;
-  return completedCount >= objective.targetCount;
+  if (objective.targetFrequency === 'daily') {
+    const today = days.find(d => d.date === toDateString(new Date()));
+    return !!today?.completed;
+  }
+  if (objective.targetFrequency === 'weekly') {
+    const completedCount = days.filter(d => d.completed).length;
+    return completedCount >= objective.targetCount;
+  }
+  return false;
 }
 
 export function useObjectiveLog(goalId: string, selectedAt: string) {

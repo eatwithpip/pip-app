@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
-const WEEKDAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // indexed by Date#getDay()
+export const WEEKDAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // indexed by Date#getDay()
 
 export interface GoalWeekStats {
   thisWeekAvg?: number;
@@ -13,7 +13,7 @@ export interface GoalWeekStats {
   days: { label: string; score: number | null }[];
 }
 
-function toDateString(d: Date) {
+export function toDateString(d: Date) {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -28,7 +28,7 @@ function dateDaysAgo(daysAgo: number) {
 }
 
 // The rolling 7-day window ending today, oldest first.
-function rollingWeekDates() {
+export function rollingWeekDates() {
   return Array.from({ length: 7 }, (_, i) => dateDaysAgo(6 - i));
 }
 

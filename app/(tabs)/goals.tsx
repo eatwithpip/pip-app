@@ -1,13 +1,11 @@
-import Ionicons from '@react-native-vector-icons/ionicons';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import ObjectiveExamplesHeader from '@/components/goals/ObjectiveExamplesHeader';
+import ObjectiveTracker from '@/components/goals/ObjectiveTracker';
 import Header from '@/components/ui/Header';
-import Modal from '@/components/ui/Modal';
-import Tag from '@/components/ui/Tag';
 import Text from '@/components/ui/Text';
-import { DIFFICULTY_OPTIONS } from '@/constants/difficulty';
+import { findObjective } from '@/constants/difficulty';
 import { type Objective } from '@/constants/goals';
 import { C } from '@/constants/palette';
 import { useProfile } from '@/hooks/useProfile';
@@ -58,22 +56,13 @@ interface GoalCardProps {
 }
 
 function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
-  const [showExamples, setShowExamples] = useState(false);
-  const hasExamples = !!objective?.foodExamples.length;
   const { thisWeekAvg, trend, checkedInDays, days } = weekStats;
   const { week, fraction } = goalWindowProgress(goal.selectedAt);
 
   return (
     <View style={styles.card}>
       <View style={styles.cardHeaderContainer}>
-        <View style={styles.cardHeader}>
-          <Tag label={goal.theme} />
-          {hasExamples && (
-            <TouchableOpacity onPress={() => setShowExamples(true)} hitSlop={8}>
-              <Ionicons name="information-circle-outline" size={22} color={C.cornflowerBlue} />
-            </TouchableOpacity>
-          )}
-        </View>
+        <ObjectiveExamplesHeader theme={goal.theme} foodExamples={objective?.foodExamples ?? []} />
         <Text style={styles.goalName}>{goal.name}</Text>
       </View>
 
@@ -84,7 +73,7 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
         </View>
       </View>
 
-      {objective && <Text style={styles.objective}>{objective.text}</Text>}
+      {objective && <ObjectiveTracker goalId={goal.id} objective={objective} />}
 
       <View style={styles.checkInBox}>
         <Text style={styles.checkInLabel}>Daily check-in</Text>
@@ -130,12 +119,6 @@ function GoalCard({ goal, objective, weekStats }: GoalCardProps) {
           })}
         </View>
       </View>
-
-      {hasExamples && (
-        <Modal visible={showExamples} title="Food ideas" onClose={() => setShowExamples(false)}>
-          <Text style={styles.modalText}>{objective!.foodExamples.join(', ')}</Text>
-        </Modal>
-      )}
     </View>
   );
 }
@@ -144,7 +127,6 @@ export default function GoalsScreen() {
   const { data: goals = [] } = useUserGoals();
   const { data: profile } = useProfile();
   const { data: weekStatsByGoal = {} } = useWeeklyGoalStats();
-  const difficultyOption = DIFFICULTY_OPTIONS.find(d => d.id === profile?.difficulty);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -159,9 +141,7 @@ export default function GoalsScreen() {
             <GoalCard
               key={goal.id}
               goal={goal}
-              objective={goal.objectives.find(
-                o => o.difficultyLevel === difficultyOption?.objectiveDifficulty
-              )}
+              objective={findObjective(goal, profile?.difficulty)}
               weekStats={weekStatsByGoal[goal.id] ?? EMPTY_WEEK_STATS}
             />
           ))}
@@ -178,9 +158,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 32,
-    gap: 24,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    gap: 12,
   },
   scrollContent: {
     gap: 40,
@@ -195,11 +175,6 @@ const styles = StyleSheet.create({
   cardHeaderContainer: {
     flexDirection: 'column',
     gap: 8
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   goalName: {
     fontSize: 26,
@@ -224,11 +199,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
     backgroundColor: C.success,
-  },
-  objective: {
-    fontSize: 15,
-    color: C.text,
-    lineHeight: 21,
   },
   checkInBox: {
     borderWidth: 1,
@@ -308,7 +278,7 @@ const styles = StyleSheet.create({
     width: 28,
   },
   barTrack: {
-    width: 24,
+    width: 40,
     height: BAR_TRACK_HEIGHT,
     borderRadius: 8,
     backgroundColor: C.bg,
@@ -322,16 +292,12 @@ const styles = StyleSheet.create({
     backgroundColor: C.sunshade,
   },
   barDay: {
-    fontSize: 12,
+    fontSize: 24,
     color: C.doveGrey,
+    fontWeight: '700',
   },
   barDayActive: {
     color: C.sunshade,
     fontWeight: '700',
-  },
-  modalText: {
-    fontSize: 15,
-    color: C.text,
-    lineHeight: 22,
   },
 });

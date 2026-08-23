@@ -19,8 +19,9 @@ export default function TextLink({ label, onPress, style }: Props) {
 
 const styles = StyleSheet.create({
   link: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: C.cornflowerBlue,
+    textDecorationLine: 'underline',
   },
 });
